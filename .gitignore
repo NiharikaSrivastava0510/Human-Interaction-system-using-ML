@@ -1,0 +1,8 @@
+
+
+# Ignore build files
+data/raw/
+data/processed/
+*.csv
+
+
