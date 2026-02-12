@@ -13,23 +13,34 @@ MODELS_DIR = PROJECT_ROOT / "models"
 RESULTS_DIR = PROJECT_ROOT / "results"
 
 # ─── Dataset Constants ───────────────────────────────────
-SAMPLING_RATE = 50  # Hz (downsampled from 100 Hz)
+SAMPLING_RATE = 50  # Hz (detected from data via mode of time diffs)
 SENSOR_AXES = ["back_x", "back_y", "back_z", "thigh_x", "thigh_y", "thigh_z"]
+EXPECTED_COLUMNS = ['timestamp', 'back_x', 'back_y', 'back_z', 'thigh_x', 'thigh_y', 'thigh_z', 'label']
 
-# Activity labels
+# Initial activity label mapping (all labels in raw data)
+ACTIVITY_LABEL_MAPPING = {
+    1: 'Walking', 2: 'Running', 3: 'Shuffling', 4: 'Stairs (Ascending)',
+    5: 'Stairs (Descending)', 6: 'Standing', 7: 'Sitting', 8: 'Lying',
+    13: 'Cycling (Sit)', 14: 'Cycling (Stand)', 130: 'Cycling (Sit, inactive)',
+    140: 'Cycling (Stand, inactive)'
+}
+
+# Final activity labels after cleaning (merged stairs = 9)
 ACTIVITY_LABELS = {
     1: "Walking",
     2: "Running",
     3: "Shuffling",
-    6: "Stairs",       # Merged: Ascending (4) + Descending (5)
+    6: "Standing",
     7: "Sitting",
-    8: "Standing",
-    9: "Lying Down",
+    8: "Lying",
+    9: "Stairs",  # Merged: Ascending (4) + Descending (5)
 }
 NUM_CLASSES = len(ACTIVITY_LABELS)
 
 # Labels to drop
 CYCLING_LABELS = [13, 14, 130, 140]
+STAIRS_LABELS = [4, 5]
+MERGED_STAIRS_LABEL = 9
 UNKNOWN_LABEL = 10
 
 # ─── Sliding Window ──────────────────────────────────────
@@ -54,22 +65,30 @@ FINETUNED_FEATURES = [
 
 # ─── GMM Hyperparameters ─────────────────────────────────
 GMM_BASELINE_K = 7
-GMM_FINETUNED_K = 20
+GMM_FINETUNED_K = 16
 GMM_COVARIANCE_TYPE = "full"
 GMM_MAX_ITER = 200
 GMM_N_INIT = 5
+GMM_N_INIT_FINETUNE = 3
 GMM_RANDOM_STATE = 42
+GMM_BIC_SEARCH_RANGE = [8, 10, 12, 16, 20]
 
 # ─── CNN Hyperparameters ─────────────────────────────────
-CNN_EPOCHS = 50
+CNN_BASELINE_EPOCHS = 10
+CNN_FINETUNED_EPOCHS = 50
 CNN_BATCH_SIZE = 64
 CNN_LEARNING_RATE = 0.001
-CNN_DROPOUT_RATE = 0.4
+CNN_DROPOUT_RATE = 0.3
 
-# Fine-tuned CNN architecture
-CNN_FILTERS = [64, 128, 256]       # Filters per conv block
-CNN_KERNEL_SIZES = [3, 3, 3]       # Kernel size per block
-CNN_POOL_SIZES = [2, 2, 2]         # MaxPool size per block
+# Baseline CNN architecture
+CNN_BASELINE_FILTERS = 64
+CNN_BASELINE_KERNEL_SIZE = 3
+CNN_BASELINE_DROPOUT = 0.5
+
+# Fine-tuned MLP architecture (operates on 16-feature set)
+CNN_FINETUNED_HIDDEN_1 = 128
+CNN_FINETUNED_HIDDEN_2 = 64
+CNN_FINETUNED_DROPOUT = 0.3
 
 # ─── Random Forest Hyperparameters ───────────────────────
 RF_BASELINE_ESTIMATORS = 100
@@ -86,4 +105,5 @@ CV_RANDOM_STATE = 42
 
 # ─── Data Quality Thresholds ─────────────────────────────
 FROZEN_SENSOR_STD_THRESHOLD = 0.02  # g — below this = "frozen" sensor
+FROZEN_SENSOR_ROLLING_WINDOW = 100  # samples for rolling std
 TIME_GAP_THRESHOLD = 0.015          # seconds — gaps above this are flagged

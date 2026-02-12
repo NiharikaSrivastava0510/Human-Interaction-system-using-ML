@@ -13,7 +13,6 @@ supplements ENMO with raw axis means to recover this information.
 """
 
 import numpy as np
-import pandas as pd
 
 
 def calculate_enmo(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
@@ -31,6 +30,27 @@ def calculate_enmo(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     return enmo
 
 
+def calculate_enmo_from_window(window: np.ndarray):
+    """
+    Calculate ENMO for back and thigh sensors from a single window.
+
+    Matches the notebook's calculate_enmo function that takes a full
+    window array of shape (window_size, 6).
+
+    Args:
+        window: Array of shape (window_size, 6) with columns
+                [back_x, back_y, back_z, thigh_x, thigh_y, thigh_z]
+
+    Returns:
+        Tuple of (back_enmo, thigh_enmo) arrays
+    """
+    back_mag = np.sqrt(window[:, 0]**2 + window[:, 1]**2 + window[:, 2]**2)
+    thigh_mag = np.sqrt(window[:, 3]**2 + window[:, 4]**2 + window[:, 5]**2)
+    back_enmo = np.maximum(0, back_mag - 1)
+    thigh_enmo = np.maximum(0, thigh_mag - 1)
+    return back_enmo, thigh_enmo
+
+
 def compute_enmo_for_window(window: np.ndarray) -> dict:
     """
     Compute ENMO-based features for a single window.
@@ -42,8 +62,7 @@ def compute_enmo_for_window(window: np.ndarray) -> dict:
     Returns:
         Dictionary with ENMO features for back and thigh sensors
     """
-    back_enmo = calculate_enmo(window[:, 0], window[:, 1], window[:, 2])
-    thigh_enmo = calculate_enmo(window[:, 3], window[:, 4], window[:, 5])
+    back_enmo, thigh_enmo = calculate_enmo_from_window(window)
 
     return {
         # Back sensor ENMO features
