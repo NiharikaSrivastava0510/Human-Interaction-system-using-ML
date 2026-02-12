@@ -202,7 +202,7 @@ jupyter>=1.0.0
 
 ```bash
 # Step 1: Preprocess raw data
-python scripts/preprocess.py --data-dir data/raw/ --output-dir data/processed/
+python scripts/preprocess.py --data-dir data/raw/train --output-dir data/processed/
 
 # Step 2: Train models
 python scripts/train_gmm.py --features 16 --clusters 20
@@ -231,7 +231,7 @@ from src.features.builder import build_features
 from src.models.cnn import FineTunedCNN
 
 # Load and preprocess
-train_raw = load_dataset("data/raw/")
+train_raw = load_dataset("data/raw/train")
 train_clean = clean_dataset(train_raw, drop_cycling=True, merge_stairs=True)
 X_train, y_train = create_sliding_windows(train_clean, window_size=100, overlap=50)
 
