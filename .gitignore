@@ -1,8 +1,35 @@
-
-
-# Ignore build files
+# Data files (too large for git)
 data/raw/
-data/processed/
+data/processed/*.npz
 *.csv
 
+# Model artifacts
+models/**/*.h5
+models/**/*.pkl
+models/**/*.keras
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_metadata
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results (regenerable)
+results/figures/*.png
+results/metrics/*.json
