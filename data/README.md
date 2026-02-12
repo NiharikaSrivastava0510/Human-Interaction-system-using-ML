@@ -9,7 +9,7 @@ This project uses accelerometer data from body-worn sensors (back and thigh plac
 ## Download Instructions
 
 1. Obtain the dataset from your course materials or the original data source
-2. Place training CSV files in `raw/`
+2. Place training CSV files in `raw/train`
 3. Place test CSV files in `raw/test/`
 
 ## Expected Format

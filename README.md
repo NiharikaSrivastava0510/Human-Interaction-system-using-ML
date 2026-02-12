@@ -72,7 +72,7 @@ human-activity-recognition/
 │
 ├── data/
 │   ├── raw/                        # Original CSV files (not tracked in git)
-│   │   ├── *.csv
+│   │   ├── train/
 │   │   └── test/
 │   ├── processed/                  # Cleaned and windowed data
 │   │   ├── train_windows.npz
