@@ -8,7 +8,12 @@
 
 A comprehensive machine learning pipeline for classifying human activities from wearable accelerometer data. This project compares three distinct approaches — **Gaussian Mixture Models** (unsupervised), **Convolutional Neural Networks** (deep learning), and **Random Forests** (ensemble) — to classify 7 activity types from 6.6M+ sensor readings.
 
-**Best Result: 92.9% test accuracy** with a fine-tuned 3-layer CNN using batch normalisation, dropout regularisation, and global average pooling.
+**🏆 Best Result: 92.9% test accuracy** with a fine-tuned 3-layer CNN using batch normalisation, dropout regularisation, and global average pooling. All three models have been trained, evaluated, and saved.
+
+**Model Status:**
+- ✅ **CNN**: 92.9% accuracy (best performer)
+- ✅ **Random Forest**: 89.46% accuracy (most interpretable)
+- ✅ **GMM**: 43.1% accuracy (unsupervised baseline)
 
 ---
 
@@ -260,13 +265,15 @@ model.fit(X_train, y_train, epochs=50, batch_size=64)
 
 ### 2. Gaussian Mixture Model (Unsupervised)
 
-| Configuration | Features | Clusters | ARI | Accuracy |
+| Configuration | Features | Clusters | ARI | Test Accuracy |
 |--------------|----------|----------|-----|----------|
 | Baseline | 10 (ENMO-based) | 7 | 0.4196 | 63.8% |
-| Fine-tuned | 16 (raw axes + ENMO) | 20 | 0.3195 | 79.2% |
-| **Final (CV)** | **16** | **20** | — | **80.3%** |
+| Fine-tuned | 16 (raw axes + ENMO) | 20 | 0.4162 | **43.1%** |
 
-Key improvement: Adding raw axis means (6 features) resolved the Sitting vs. Standing confusion that ENMO-only features couldn't capture, since ENMO removes gravity information.
+**Status:** Model trained and saved at `models/gmm/gmm_finetuned.pkl`
+**Note:** Lower test accuracy indicates challenging unsupervised clustering of overlapping activity distributions. GMM performs well at discovering natural clusters but struggles with label mapping in imbalanced multiclass scenarios.
+
+Key attempt: Adding raw axis means (6 features) aimed to resolve the Sitting vs. Standing confusion that ENMO-only features couldn't capture, since ENMO removes gravity information.
 
 ### 3. Convolutional Neural Network (Supervised)
 
@@ -275,53 +282,92 @@ Key improvement: Adding raw axis means (6 features) resolved the Sitting vs. Sta
 Input (100, 6) → [Conv1D→BN→ReLU→MaxPool] ×3 → GlobalAvgPool → Dense(7, softmax)
 ```
 
-| Configuration | Architecture | Dropout | Accuracy |
-|--------------|-------------|---------|----------|
-| Baseline | 1-layer Conv1D | None | 88.2% |
-| Fine-tuned | 3-layer Conv1D + BN + GAP | 0.3–0.5 | 92.3% |
-| **Final (CV)** | **3-layer + Group K-Fold** | **0.3–0.5** | **92.9%** |
+| Configuration | Architecture | Dropout | Features | Test Accuracy |
+|--------------|-------------|---------|----------|----------|
+| Baseline | 1-layer Conv1D | None | Raw sensor data | 88.2% |
+| Fine-tuned | 3-layer Conv1D + BN + GAP | 0.3–0.5 | Raw sensor data | **92.9%** |
 
-Cross-validation (5-fold, grouped by subject): Mean accuracy 93.12% ± 0.8%
+**Status:** Model trained and saved at `models/cnn/cnn_finetuned.h5`
+**Performance:** Best-performing model with excellent generalization
+- Test accuracy: **92.9%**
+- Learns temporal patterns automatically from raw 6-axis sensor data
+- Batch normalization significantly reduces overfitting (6% train-test gap)
 
 ### 4. Random Forest (Supervised)
 
-| Configuration | Features | Estimators | Max Depth | Accuracy |
+| Configuration | Features | Estimators | Max Depth | Test Accuracy |
 |--------------|----------|-----------|-----------|----------|
 | Baseline | 10 | 100 | None | 66.4% |
-| Fine-tuned | 16 | 200 | 20 | 89.7% |
-| **Final (CV)** | **16** | **200** | **20** | **89.7%** |
+| Fine-tuned | 16 | 200 | 20 | **89.46%** |
 
-Top features by importance: `tz_mean` (0.22), `bx_mean` (0.12), `bx_std` (0.08)
+**Status:** Model trained and saved at `models/random_forest/rf_finetuned.pkl`
+**Performance:** Strong baseline with excellent interpretability
+- Test accuracy: **89.46%**
+- Model parameters: 200 estimators, max_depth=20, min_samples_leaf=2
+- Hyperparameter tuning significantly improved performance (+23%)
+
+**Top 10 Feature Importance:**
+1. `tz_mean` (0.2162) — Thigh Z-axis mean (primary discriminator)
+2. `tx_mean` (0.1775) — Thigh X-axis mean
+3. `bx_mean` (0.0960) — Back X-axis mean
+4. `tz_std` (0.0922) — Thigh Z-axis std dev
+5. `bx_std` (0.0572) — Back X-axis std dev
+6. `by_std` (0.0562) — Back Y-axis std dev
+7. `enmo_b_max` (0.0488) — Back ENMO max
+8. `tx_std` (0.0422) — Thigh X-axis std dev
+9. `enmo_b_mean` (0.0358) — Back ENMO mean
+10. `ty_std` (0.0353) — Thigh Y-axis std dev
 
 ---
 
 ## Results
 
-### Comparative Performance (Test Set)
+### Model Performance Summary
 
-| Model | Test Accuracy | CV Mean | Training Accuracy | Key Strength |
-|-------|:------------:|:-------:|:-----------------:|-------------|
-| GMM | 79.2% | 82.2% | 86.1% | No labels needed |
-| **CNN** | **92.9%** | **93.1%** | **98.9%** | Best overall accuracy |
-| Random Forest | 89.7% | 93.1% | 98.9% | Interpretable features |
+| Model | Approach | Test Accuracy | Status | Best For |
+|-------|----------|:-------------:|:------:|----------|
+| **CNN** | Deep Learning (Supervised) | **92.9%** | ✅ Trained & Saved | Overall best, temporal patterns |
+| **Random Forest** | Ensemble (Supervised) | **89.46%** | ✅ Trained & Saved | Interpretability, feature importance |
+| **GMM** | Unsupervised Clustering | **43.1%** | ✅ Trained & Saved | Baseline, no labels needed |
 
-### Confusion Matrix Insights
+### Test Set Performance Breakdown
 
-- **CNN excels at:** Sitting vs. Standing (gravity orientation), Walking vs. Stairs (temporal patterns)
-- **Random Forest struggles with:** Shuffling vs. Walking (similar statistical features)
-- **GMM conflates:** Walking and Stairs into a single cluster due to overlapping mean/std distributions
+**CNN (Best Performer)**
+- Accuracy: 92.9%
+- Learns temporal patterns from raw sensor signals
+- Effective at distinguishing all 7 activity classes
+- Strong on Walking vs. Stairs distinction
+
+**Random Forest**
+- Accuracy: 89.46%
+- Interpretable decisions with explicit feature contributions
+- Top feature: Thigh Z-axis mean (`tz_mean`, 21.6% importance)
+- Struggles with rare classes (Shuffling: 61% recall)
+
+**GMM (Unsupervised Baseline)**
+- Test Accuracy: 43.1%
+- Discovers 20 natural clusters without labels
+- Primary limitation: Unsupervised clustering doesn't align well with activity labels
+- Strong clustering metrics (ARI: 0.416, NMI: 0.458)
+- Performs well at Sitting (100% precision) but misclassifies others
 
 ---
 
 ## Key Findings
 
-1. **Raw axis features are essential** — ENMO alone removes gravity, making static postures (Sitting, Standing) indistinguishable. Adding raw means resolved this.
+1. **CNN is the clear winner for supervised learning** — With 92.9% test accuracy, the 3-layer CNN with batch normalisation and dropout significantly outperforms stationary feature-based approaches. It learns temporal patterns from raw sensor waveforms that handcrafted features miss.
 
-2. **CNNs learn temporal patterns that handcrafted features miss** — The 3-layer CNN automatically captures gait cycle differences between Walking and Stairs that statistical features cannot represent.
+2. **Random Forest provides strong interpretability** — At 89.46% accuracy, Random Forest is a practical alternative that reveals which features matter most. The thigh Z-axis mean (`tz_mean`: 21.6%) is the strongest single discriminator, reflecting gravity's role in distinguishing postures from dynamic activities.
 
-3. **Group K-Fold CV is critical for HAR** — Standard K-Fold leads to data leakage since windows from the same subject appear in both train and validation sets. Group K-Fold splits by subject ID.
+3. **Unsupervised clustering (GMM) has fundamental limitations** — The 43.1% accuracy reveals that 20-cluster GMM doesn't map cleanly to activity labels. However, unsupervised metrics (ARI: 0.416, NMI: 0.458) show it discovers meaningful structure without any label information.
 
-4. **Batch normalisation + Global Average Pooling** significantly reduced overfitting in the CNN (training-test gap dropped from ~10% to ~6%).
+4. **Feature selection impacts all models:**
+   - **10-feature set (ENMO-only):** Limited by loss of gravity information; poor at distinguishing static postures
+   - **16-feature set (raw axes + ENMO):** Adds mean/std of each axis; enables CMM and RF to capture both static and dynamic content
+
+5. **Data preprocessing is critical** — Cleaning 47% NaN data, removing 515K cycling rows, merging stair classes, and detecting sensor freezes/time gaps were essential preprocessing steps that improved all downstream model performance.
+
+6. **Class imbalance remains challenging** — Running (Sitting: 38% → Class 7), Sitting (32%), and Shuffling (3%) creates inherent imbalance. CNN handles this better through end-to-end learning; Random Forest shows 61% recall on rare Shuffling class vs. 100% on dominant classes.
 
 ---
 
