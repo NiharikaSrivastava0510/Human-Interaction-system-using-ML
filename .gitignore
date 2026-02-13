@@ -1,35 +1,155 @@
-# Data files (too large for git)
-data/raw/
-data/processed/*.npz
-*.csv
+# ============================================================================
+# DATA FILES (too large for git)
+# ============================================================================
+data/raw/**/*.csv
+data/processed/**/*.npz
+data/processed/**/*.pkl
 
-# Model artifacts
+# ============================================================================
+# MODEL ARTIFACTS (regenerable from training scripts)
+# ============================================================================
 models/**/*.h5
-models/**/*.pkl
 models/**/*.keras
+models/**/*.pkl
+models/**/*.pth
+models/cnn/
+models/gmm/
+models/random_forest/
+*.model
+*.joblib
 
-# Python
+# ============================================================================
+# PYTHON & VIRTUAL ENVIRONMENTS
+# ============================================================================
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.venv_backup/
+
+# Python cache and compiled files
 __pycache__/
 *.py[cod]
-*.egg-info/
-dist/
+*$py.class
+*.so
+.Python
 build/
-venv/
-.env
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Jupyter
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# ============================================================================
+# JUPYTER NOTEBOOKS
+# ============================================================================
 .ipynb_checkpoints/
-*.ipynb_metadata
+*.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+.ipynb_metadata
+*.ipynb
 
-# IDE
+# ============================================================================
+# IDE & EDITOR FILES
+# ============================================================================
 .vscode/
 .idea/
 *.swp
-
-# OS
+*.swo
+*~
 .DS_Store
-Thumbs.db
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+.vim/
+.emacs.d/
 
-# Results (regenerable)
-results/figures/*.png
-results/metrics/*.json
+# ============================================================================
+# OS & SYSTEM FILES
+# ============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.lnk
+.directory
+
+# ============================================================================
+# RESULTS & OUTPUTS (regenerable from models and evaluation scripts)
+# ============================================================================
+results/**/*.png
+results/**/*.jpg
+results/**/*.pdf
+results/**/*.json
+results/**/*.csv
+results/**/*.html
+results/figures/
+results/metrics/
+results/logs/
+
+# ============================================================================
+# TEMPORARY & LOG FILES
+# ============================================================================
+*.log
+*.pot
+*.tmp
+*.temp
+*~
+.cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+
+# ============================================================================
+# ENVIRONMENT & CONFIGURATION
+# ============================================================================
+.env
+.env.local
+.env.*.local
+config/local_config.py
+secrets.yaml
+credentials.json
+
+# ============================================================================
+# TensorFlow & ML FRAMEWORKS
+# ============================================================================
+.tensorboard/
+.keras_cache/
+runs/
+
+# ============================================================================
+# LARGE FILES
+# ============================================================================
+*.tar.gz
+*.zip
+*.rar
+*.7z
